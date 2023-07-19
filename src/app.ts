@@ -14,10 +14,12 @@ app.get('/', (req, res) => {
 })
 
 io.on('connection', (socket) => {
-    console.log('a user connected');
+    socket.emit('message', 'Welcome to chat!')
+
+    io.emit('message', 'Someone has joined the chat')
 
     socket.on('disconnect', () => {
-        console.log('user disconnected');
+        io.emit('message', 'Someone has left the chat')
     }) 
 });
 
