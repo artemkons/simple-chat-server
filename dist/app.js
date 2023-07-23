@@ -19,6 +19,9 @@ io.on('connection', (socket) => {
     socket.on('disconnect', () => {
         io.emit('message', 'Someone has left the chat');
     });
+    socket.on('chatMsg', (msg) => {
+        io.emit('message', msg);
+    });
 });
 server.listen(port, () => {
     console.log(`Hello world ${port}`);
