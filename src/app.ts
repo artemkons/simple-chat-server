@@ -7,25 +7,34 @@ const server = http.createServer(app);
 import { Server } from 'socket.io';
 const io = new Server(server);
 
+import { addUser, getUser } from './utils/users';
+
 const port = 3001
 
-app.get('/', (req, res) => {
-    res.send('2')
-})
-
 io.on('connection', (socket) => {
-    socket.emit('message', 'Welcome to chat!')
-    io.emit('message', 'Someone has joined the chat')
+    socket.on('joinRoom', ({ username, room }) => {
+        socket.join(room)
 
-    socket.on('disconnect', () => {
-        io.emit('message', 'Someone has left the chat')
-    }) 
+        socket.emit('message', `Welcome to ${room}!`)
+        io.to(room).emit('message', `${username} has joined the chat`)
+
+        const user = { id: socket.id, username, room }
+        addUser(user)
+    })
 
     socket.on('chatMsg', (msg) => {
-        io.emit('message', msg)
+        const user = getUser(socket.id)
+
+        if (user) io.to(user.room).emit('message', msg)
     })
+
+    socket.on('disconnect', () => {
+        const user = getUser(socket.id)
+
+        if (user) io.to(user.room).emit('message', `${user.username} has left the chat`)
+    }) 
 })
 
 server.listen(port, () => {
-    console.log(`Hello world ${port}`)
+    console.log(`Server is running on ${port}`)
 })

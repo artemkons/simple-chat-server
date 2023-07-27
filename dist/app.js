@@ -9,20 +9,27 @@ const app = (0, express_1.default)();
 const server = http.createServer(app);
 const socket_io_1 = require("socket.io");
 const io = new socket_io_1.Server(server);
+const users_1 = require("./utils/users");
 const port = 3001;
-app.get('/', (req, res) => {
-    res.send('2');
-});
 io.on('connection', (socket) => {
-    socket.emit('message', 'Welcome to chat!');
-    io.emit('message', 'Someone has joined the chat');
-    socket.on('disconnect', () => {
-        io.emit('message', 'Someone has left the chat');
+    socket.on('joinRoom', ({ username, room }) => {
+        socket.join(room);
+        socket.emit('message', `Welcome to ${room}!`);
+        io.to(room).emit('message', `${username} has joined the chat`);
+        const user = { id: socket.id, username, room };
+        (0, users_1.addUser)(user);
     });
     socket.on('chatMsg', (msg) => {
-        io.emit('message', msg);
+        const user = (0, users_1.getUser)(socket.id);
+        if (user)
+            io.to(user.room).emit('message', msg);
+    });
+    socket.on('disconnect', () => {
+        const user = (0, users_1.getUser)(socket.id);
+        if (user)
+            io.to(user.room).emit('message', `${user.username} has left the chat`);
     });
 });
 server.listen(port, () => {
-    console.log(`Hello world ${port}`);
+    console.log(`Server is running on ${port}`);
 });
