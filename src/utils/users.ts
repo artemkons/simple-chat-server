@@ -21,3 +21,7 @@ export const removeUser = (id: User['id']) => {
         return users.splice(i, 1)[0]
     }
 }
+
+export const getRoomUsers = (room: User['room']) => {
+    return users.filter(user => user.room === room)
+}

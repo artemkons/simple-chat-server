@@ -7,7 +7,7 @@ const server = http.createServer(app);
 import { Server } from 'socket.io'
 const io = new Server(server)
 
-import { addUser, getUser, removeUser } from './utils/users'
+import { addUser, getUser, removeUser, getRoomUsers } from './utils/users'
 
 const port = 3001
 
@@ -20,6 +20,11 @@ io.on('connection', (socket) => {
 
         const user = { id: socket.id, username, room }
         addUser(user)
+
+        io.to(room).emit('enteredToRoom', {
+            room,
+            users: getRoomUsers(room)
+        })
     })
 
     socket.on('chatMsg', (msg) => {
@@ -32,7 +37,13 @@ io.on('connection', (socket) => {
         const user = removeUser(socket.id)
 
         if (user) {
-            io.to(user.room).emit('message', `${user.username} has left the chat`)
+            const room = user.room
+            io.to(room).emit('message', `${user.username} has left the chat`)
+
+            io.to(room).emit('enteredToRoom', {
+                room,
+                users: getRoomUsers(room)
+            })
         }
     }) 
 })

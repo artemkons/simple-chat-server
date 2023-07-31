@@ -18,6 +18,10 @@ io.on('connection', (socket) => {
         io.to(room).emit('message', `${username} has joined the chat`);
         const user = { id: socket.id, username, room };
         (0, users_1.addUser)(user);
+        io.to(room).emit('enteredToRoom', {
+            room,
+            users: (0, users_1.getRoomUsers)(room)
+        });
     });
     socket.on('chatMsg', (msg) => {
         const user = (0, users_1.getUser)(socket.id);
@@ -27,7 +31,12 @@ io.on('connection', (socket) => {
     socket.on('disconnect', () => {
         const user = (0, users_1.removeUser)(socket.id);
         if (user) {
-            io.to(user.room).emit('message', `${user.username} has left the chat`);
+            const room = user.room;
+            io.to(room).emit('message', `${user.username} has left the chat`);
+            io.to(room).emit('enteredToRoom', {
+                room,
+                users: (0, users_1.getRoomUsers)(room)
+            });
         }
     });
 });

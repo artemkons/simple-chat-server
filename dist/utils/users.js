@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.removeUser = exports.getUser = exports.addUser = void 0;
+exports.getRoomUsers = exports.removeUser = exports.getUser = exports.addUser = void 0;
 const users = [];
 const addUser = (user) => {
     users.push(user);
@@ -17,3 +17,7 @@ const removeUser = (id) => {
     }
 };
 exports.removeUser = removeUser;
+const getRoomUsers = (room) => {
+    return users.filter(user => user.room === room);
+};
+exports.getRoomUsers = getRoomUsers;
