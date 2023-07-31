@@ -25,9 +25,10 @@ io.on('connection', (socket) => {
             io.to(user.room).emit('message', msg);
     });
     socket.on('disconnect', () => {
-        const user = (0, users_1.getUser)(socket.id);
-        if (user)
+        const user = (0, users_1.removeUser)(socket.id);
+        if (user) {
             io.to(user.room).emit('message', `${user.username} has left the chat`);
+        }
     });
 });
 server.listen(port, () => {

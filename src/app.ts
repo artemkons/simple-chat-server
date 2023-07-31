@@ -4,10 +4,10 @@ const http = require('http');
 const app = express()
 const server = http.createServer(app);
 
-import { Server } from 'socket.io';
-const io = new Server(server);
+import { Server } from 'socket.io'
+const io = new Server(server)
 
-import { addUser, getUser } from './utils/users';
+import { addUser, getUser, removeUser } from './utils/users'
 
 const port = 3001
 
@@ -29,9 +29,11 @@ io.on('connection', (socket) => {
     })
 
     socket.on('disconnect', () => {
-        const user = getUser(socket.id)
+        const user = removeUser(socket.id)
 
-        if (user) io.to(user.room).emit('message', `${user.username} has left the chat`)
+        if (user) {
+            io.to(user.room).emit('message', `${user.username} has left the chat`)
+        }
     }) 
 })
 
