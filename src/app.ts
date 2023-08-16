@@ -15,8 +15,7 @@ io.on('connection', (socket) => {
     socket.on('joinRoom', ({ username, room }) => {
         socket.join(room)
 
-        socket.emit('message', `Welcome to ${room}!`)
-        io.to(room).emit('message', `${username} has joined the chat`)
+        io.to(room).emit('message', { user: { id: -1, username: 'bot' }, msg: `${username} has joined the chat` })
 
         const user = { id: socket.id, username, room }
         addUser(user)
@@ -30,7 +29,7 @@ io.on('connection', (socket) => {
     socket.on('chatMsg', (msg) => {
         const user = getUser(socket.id)
 
-        if (user) io.to(user.room).emit('message', msg)
+        if (user) io.to(user.room).emit('message', { user, msg: msg})
     })
 
     socket.on('disconnect', () => {
@@ -38,7 +37,7 @@ io.on('connection', (socket) => {
 
         if (user) {
             const room = user.room
-            io.to(room).emit('message', `${user.username} has left the chat`)
+            io.to(room).emit('message', { user: { id: -1, username: 'bot' }, msg: `${user.username} has left the chat` })
 
             io.to(room).emit('enteredToRoom', {
                 room,
